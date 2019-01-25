@@ -10,15 +10,26 @@ class TasksController extends Controller
 {
     // getでtasks/にアクセスされた場合の「一覧表示処理」
     
-        public function index()
+    public function index()
     {
-        $tasks = Task::all();
-
-        return view('tasks.index', [
-            'tasks' => $tasks,
-        ]);
-    
+        $data = [];
+        if (\Auth::check()) {
+            $user = \Auth::user();
+            $tasks = $user->tasklist()->orderBy('created_at', 'desc')->paginate(10);
+            
+            $data = [
+                'user' => $user,
+                'tasks' => $tasks,
+            ];
+            return view('tasks.index', [
+                'tasks' => $tasks,
+            ]);
+        }
+        
+        return view('welcome', $data);
     }
+    
+    
 
     // getでtasks/createにアクセスされた場合の「新規登録画面表示処理」
     public function create()
@@ -31,7 +42,7 @@ class TasksController extends Controller
     }
 
 
-    // getでtasks/idにアクセスされた場合の「取得表示処理」
+    // getでtasks/idにア                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   クセスされた場合の「取得表示処理」
     public function show($id)
     {
         $task = task::find($id);
@@ -48,11 +59,13 @@ class TasksController extends Controller
         ]);
         $task = new Task;
         $task->content = $request->content;
-        $task->status = $request->status;  
+        $task->status = $request->status;
+        $task->user_id = \Auth::id();
+        
         $task->save();
         
 
-        return redirect('/');
+        return redirect('index');
     }
 
     // getでtasks/id/editにアクセスされた場合の「更新画面表示処理」
@@ -72,15 +85,16 @@ class TasksController extends Controller
         ]);
         $task = task::find($id);
         $task->content = $request->content;
+        
         $task->status = $request->status;
         $task->save();
-        return redirect('/');
+        return redirect('index');
     }
     public function destroy($id)
     {
         $task = task::find($id);
         $task->delete();
 
-        return redirect('/');
+        return redirect('index');
     }
 }
