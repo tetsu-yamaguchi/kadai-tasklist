@@ -47,9 +47,12 @@ class TasksController extends Controller
     {
         $task = task::find($id);
 
-        return view('tasks.show', [
-            'task' => $task,
-        ]);
+        if (\Auth::id() == $task->user_id){
+            return view('tasks.show', [
+                'task' => $task,
+            ]);
+        }
+        return redirect('index');
     }
     
     public function store(Request $request)
@@ -72,10 +75,12 @@ class TasksController extends Controller
     public function edit($id)
     {
         $task = task::find($id);
-
-        return view('tasks.edit', [
-            'task' => $task,
-        ]);
+        if (\Auth::id() == $task->user_id){
+            return view('tasks.edit', [
+                'task' => $task,
+            ]);
+        }
+        return redirect('index');
     }
 
      public function update(Request $request, $id)
@@ -84,17 +89,20 @@ class TasksController extends Controller
             'status' => 'required|max:10',
         ]);
         $task = task::find($id);
-        $task->content = $request->content;
-        
-        $task->status = $request->status;
-        $task->save();
+        if (\Auth::id() == $task->user_id){
+            $task->content = $request->content;
+            
+            $task->status = $request->status;
+            $task->save();
+        }
         return redirect('index');
     }
     public function destroy($id)
     {
         $task = task::find($id);
-        $task->delete();
-
+        if (\Auth::id() == $task->user_id){
+            $task->delete();
+        }
         return redirect('index');
     }
 }
